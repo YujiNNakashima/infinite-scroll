@@ -26,7 +26,8 @@ app.get('/comments', async (req, res) => {
     }
   
     const { rows } = await pool.query(`
-        SELECT * FROM comments
+        SELECT comment_text, users.username FROM comments c
+        JOIN users ON c.username_id = users.user_id
         ORDER BY created_at
         LIMIT $2
         OFFSET (($1 - 1) * $2);
@@ -60,9 +61,16 @@ app.post('/comment', async (req, res) => {
   } = req.body
 
   try {
-    await pool.query('INSERT INTO comments (username, comment_text) VALUES ($1, $2);',
+    const user = await pool.query(`SELECT * FROM users WHERE username = $1`, [username])
+
+    if(user.rows.length <= 0) {
+      console.log('não achou usuário')
+      await pool.query(`INSERT INTO users (username) VALUES($1)`, [username]) 
+    }
+    const {rows} = await pool.query(`SELECT user_id FROM users WHERE username = $1`, [username])
+    await pool.query('INSERT INTO comments (username, comment_text, username_id) VALUES ($1, $2, $3);',
      [username,
-      commentText]);
+      commentText, rows[0].username_id]);
 
     res.json({
       statusCode: 201,
@@ -74,6 +82,7 @@ app.post('/comment', async (req, res) => {
     })  
     
   } catch (error) {
+    console.log(error)
     res.json({
       statusCode: 500,
       data: 'ops, algo deu errado'
