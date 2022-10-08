@@ -97,17 +97,31 @@ app.post('/seed', async (req, res) => {
   try {
     for(let i = 0; i < amount; i++) {
 
-      await pool.query('INSERT INTO comments (username, comment_text) VALUES ($1, $2);',
-      [faker.name.fullName(),
-        faker.lorem.paragraph()]);
+      pool.query(`BEGIN`)
+      const username = faker.name.fullName()
+      const user = await pool.query(`SELECT * FROM users WHERE username = $1`, [username])
+
+      if(user.rows.length <= 0) {
+        await pool.query(`INSERT INTO users (username) VALUES($1)`, [username]) 
+      }
+
+      const userId =  await pool.query('SELECT username, user_id FROM users WHERE username = $1',
+        [username]);
+      
+      await pool.query('INSERT INTO comments (comment_text, username_id) VALUES ($1, $2);',
+      [faker.lorem.paragraph(), userId.rows[0].user_id]);
 
     }
+
+    pool.query('COMMIT')
     res.json({
       statusCode: 201,
       text: 'criado!',
       amount: `${amount}`
     }) 
   } catch (error) {
+    pool.query(`ROLLBACK`)
+
     res.json({
       statusCode: 500,
       data: error
