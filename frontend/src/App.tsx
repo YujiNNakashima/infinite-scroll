@@ -6,7 +6,20 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query"
 
-function App() {
+type Comments = {
+  comment_text: string;
+  username: string;
+}
+
+type ReactQueryResponse<T> = {
+  currentPage: string;
+  data: T;
+  hasNextPage: boolean;
+  total: string;
+  totalPages:number;
+}
+
+const App: React.FC = () => {
 const referencePageCount = useRef(1)
   const { ref, inView } = useInView()
 
@@ -20,11 +33,11 @@ const referencePageCount = useRef(1)
   } = useInfiniteQuery(
     ['comments'],
     async ({ pageParam = 1 }) => {
-      const res = await axios.get(`http://localhost:3000/comments?page=${pageParam}&size=5`)
+      const res = await axios.get<ReactQueryResponse<Comments[]>>(`http://localhost:3000/comments?page=${pageParam}&size=5`)
       return res.data
     }
-  )
-
+    )
+    
   useEffect(() => {
     if (inView) {
       fetchNextPage({
@@ -44,8 +57,8 @@ const referencePageCount = useRef(1)
         <>
           {data.pages.map((page, i) => (
             <Fragment key={`key-${i}`}>
-              {page.data.map((comment: any) => (
-                <div className="mb-8 p-10 border-solid border-2 rounded-md flex">
+              {page.data.map((comment: any, y: number) => (
+                <div className="mb-8 p-10 border-solid border-2 rounded-md flex" key={`keys-${y}`}>
                   <div className="username mr-8  decoration-sky-900">
                     {comment.username}:
                   </div>
