@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "migrate": "DATABASE_URL=postgres://root:root@localhost:5432/infinite_scroll_db node-pg-migrate"
+    "migrate": "DATABASE_URL=postgres://root:root@localhost:5432/infinite_scroll_db node-pg-migrate",
+    "start:dev": "npx nodemon"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,12 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.5.0",
-    "nodemon": "^2.0.20"
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.11",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.4"
   }
 }
